@@ -110,5 +110,11 @@ sub validateaddress {
 }
 
 
+sub setaccount {
+    my ($self, $address, $account) = @_; 
+    my $res = $self->raw({method  => 'setaccount', params  => [$address, $account]});
+    return $res;
+}
+
 
 42;
