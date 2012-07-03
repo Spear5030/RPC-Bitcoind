@@ -1,6 +1,8 @@
 package RPC::Bitcoind;
 
 use JSON::RPC::Client;
+use Data::Dumper;
+use Carp;
 
 BEGIN {
     for my $method (qw/uri rpc status error is_error/) {
@@ -20,10 +22,12 @@ sub new {
 	my $self  = bless {}, (ref $proto ? ref $proto : $proto);
 	my $user = $opt{'user'} || '';
 	my $password = $opt{'password'};
+	croak "Need password." unless $password;
 	my $port = $opt{'port'} || '8332';
 	my $host = $opt{'host'} || 'localhost';
 	my $rpc = new JSON::RPC::Client;
 	$rpc->ua->credentials(	"$host:$port", 'jsonrpc', $user => $password);
+	$rpc->ua->timeout(20);
 	$self->uri("http://$host:$port/");
 	$self->rpc(bless $rpc, JSON::RPC::Client);
 	return $self;
@@ -31,8 +35,8 @@ sub new {
 
 
 sub raw{
-    my ($self, $obj) = @_;
-    my $res=$self->rpc->call($self->uri, $obj);
+    my $self = shift;
+    my $res=$self->rpc->call($self->uri, @_);
     if ($res){
       if ($res->is_error) {
          $self->is_error(1); 
@@ -51,7 +55,7 @@ sub getstatus {
 
 sub getbalance {
     my ($self, $param) = @_;
-    return $self->raw({method  => 'getbalance', params  => $param});
+    return $self->raw({method  => 'getbalance', param  => $param});
 }
 
 sub getdifficulty {
@@ -70,12 +74,12 @@ sub getblockcount {
 
 sub getblockhash {
     my ($self, $param) = @_;
-    return $self->raw({method  => 'getblockhash', params  => $param});
+    return $self->raw({method  => 'getblockhash', param  => $param});
 }
 
 sub getblock {
     my ($self, $param) = @_;
-    return $self->raw({method  => 'getblock', params  => $param});
+    return $self->raw({method  => 'getblock', param  => $param});
 }
 
 sub getmininginfo {
@@ -85,7 +89,26 @@ sub getmininginfo {
 
 sub getnewaddress {
     my ($self, $param) = @_;
-    return $self->raw({method  => 'getnewaddress', params  => $param});
+    return $self->raw({method  => 'getnewaddress', param  => $param});
 }
+
+sub listaccounts {
+    my $self = shift;
+    return $self->raw({method  => 'listaccounts'});
+}
+
+sub getaddressesbyaccount{
+    my ($self, $param) = @_; 
+    return ($self->raw({method  => 'getaddressesbyaccount', params  => [$param]}));
+}
+
+
+sub validateaddress {
+    my ($self, $param) = @_; 
+    my %res = %{$self->raw({method  => 'validateaddress', params  => [$param]})};
+    return $res{isvalid};
+}
+
+
 
 42;
