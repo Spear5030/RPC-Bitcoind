@@ -116,5 +116,29 @@ sub setaccount {
     return $res;
 }
 
+sub move {
+    my ($self, $from, $to, $amount, $comment) = @_; 
+    my $res = $self->raw({method  => 'move', params  => [$from, $to, $amount, $comment]});
+    return $res;
+}
+
+sub listtransactions {
+    my ($self, $account, $count, $from) = @_; 
+    my $res;
+    if ($account && $count && $from) {
+    $res = $self->raw({method  => 'listtransactions', params  => [$account, $count, $from]});
+    } elsif ($account && $count) {
+    $res = $self->raw({method  => 'listtransactions', params  => [$account, $count]});
+    } elsif ($account) {
+    $res = $self->raw({method  => 'listtransactions', param  => [$account]});
+    } else {
+    $res = $self->raw({method  => 'listtransactions'});
+    }
+    return $res;
+    
+}
+
+
+
 
 42;
