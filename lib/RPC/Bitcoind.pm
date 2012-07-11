@@ -118,7 +118,12 @@ sub setaccount {
 
 sub move {
     my ($self, $from, $to, $amount, $comment) = @_; 
-    my $res = $self->raw({method  => 'move', params  => [$from, $to, $amount, $comment]});
+    my $res;
+    if ($from && $to && $amount && $comment){
+    $res = $self->raw({method  => 'move', params  => [$from, $to, $amount, $comment]});
+    } elsif ($from && $to && $amount) {
+    $res = $self->raw({method  => 'move', params  => [$from, $to, $amount]});
+    }
     return $res;
 }
 
@@ -135,9 +140,33 @@ sub listtransactions {
     $res = $self->raw({method  => 'listtransactions'});
     }
     return $res;
-    
 }
 
+sub send {
+    my ($self, $address, $amount, $comment, $commentto) = @_; 
+    my $res;
+    if ($address && $amount && $comment && $commentto) {
+    $res = $self->raw({method  => 'sendtoaddress', params  => [$address, $amount, $comment, $commentto]});
+    } elsif ($address && $amount && $comment) {
+    $res = $self->raw({method  => 'sendtoaddress', params  => [$address, $amount, $comment]});
+    } elsif ($address && $amount) {
+    $res = $self->raw({method  => 'sendtoaddress', params  => [$address, $amount]});
+    };
+    return $res;
+}
+
+sub sendfrom {
+    my ($self, $from, $address, $amount, $comment, $commentto) = @_; 
+    my $res;
+    if ($from && $address && $amount && $comment && $commentto) {
+    $res = $self->raw({method  => 'sendfrom', params  => [$from, $address, $amount, 1, $comment, $commentto]});
+    } elsif ($from && $address && $amount && $comment) {
+    $res = $self->raw({method  => 'sendfrom', params  => [$from, $address, $amount, 1, $comment]});
+    } elsif ($from && $address && $amount) {
+    $res = $self->raw({method  => 'sendfrom', params  => [$from, $address, $amount]});
+    };
+    return $res;
+}
 
 
 
